@@ -1,14 +1,13 @@
 package main
 
 import (
-	pb "github.com/RaminCH/lec5/server/proto/consigment"
-	_ "google.golang.org/grpc"
-	_ "google.golang.org/grpc/reflection"
+	"context"
+	"log"
+	"net"
 
-	_ "context"
-	_ "log"
-	_ "net"
-	_ "sync"
+	pb "github.com/RaminCH/lec5/grpc_containers/server/proto/consigment"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 const (
@@ -20,6 +19,54 @@ type repository interface {
 	Create(*pb.Command) (*pb.Command, error)
 }
 
-func main() {
+//Repository... Nasha DB - localnaya - v dalneyshem realniye DB na Docker budut
+type Repository struct {
+	commands *[]pb.Command
+}
 
+//Create...		(etot metod budet delat Create dla 'type service struct' )
+func (r *Repository) Create(command *pb.Command) (*pb.Command, error) {
+	updatedCommands := append(*r.commands, command)
+	r.commands = updatedCommands //yesli prisvoit srazu bez 'updatedCommands' to budet infinite loop !
+	return command, nil
+}
+
+type service struct {
+	repo repository //u servisa budet yedinstvennoye pole -> gde xranatsa danniye
+}
+
+// repo - eto nekiy obj., udovl. interfeysu repository, kotoriy umeyet delat Create
+// takje obj. tipa 'service' doljen udovl interfeysu, kot nax. v consigment.proto -> service ShippingService { rpc CreateCommand(Command) ...
+// type service struct -> doljen umet Create i v cons..pb.go -> naxodim (unimplemented) CreateCommand... i kopiruyem suda(chutok izmeniv) --> see below
+
+func (s *service) CreateCommand(ctx context.Context, req *pb.Command) (*pb.Response, error) {
+	command, err := s.repo.Create(req)
+	if err != nil {
+		return nil, err
+	}
+	return &pb.Response{Created: true, Command: command}, nil //Response -> check consigment.proto and consigment.pb.go
+}
+
+func main() {
+	repo := &Repository{} //local storage
+
+	//nastroyka gRPC servera
+	listener, err := net.Listen("tcp", port)
+	if err != nil {
+		log.Fatalf("Failed to listen port: %v", err)
+	}
+
+	server := grpc.NewServer()
+
+	//Registriruyem nash servis dla servera
+	ourService := &service{repo}                         //repo v -> type service struct{...}
+	pb.RegisterShippingServiceServer(server, ourService) //sopostavlayem (s *grpc.Server-grpc) s (srv ShippingServiceServer-nash) see con..pb.go file
+
+	//chtobi vixodniye parametri servera soxranalis v go-runtime
+	reflection.Register(server) //reflektim, chtobi danniye ne provalivalis v 'run time'
+
+	log.Println("gRPC server runs on port: ", port)
+	if err := server.Serve(listener); err != nil {
+		log.Fatalf("failed to serve from port: %v", port)
+	}
 }
