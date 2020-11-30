@@ -17,6 +17,7 @@ const (
 //obyekt kotoriy budet xranit info o vnutrennix konfiguratsiyax
 type repository interface {
 	Create(*pb.Command) (*pb.Command, error)
+	GetAll() []*pb.Command
 }
 
 //Repository... Nasha DB - localnaya - v dalneyshem realniye DB na Docker budut
@@ -29,6 +30,11 @@ func (r *Repository) Create(command *pb.Command) (*pb.Command, error) {
 	updatedCommands := append(*r.commands, command)
 	r.commands = updatedCommands //yesli prisvoit srazu bez 'updatedCommands' to budet infinite loop !
 	return command, nil
+}
+
+//GetAll...
+func (r *Repository) GetAll() []*pb.Command {
+	return r.commands
 }
 
 type service struct {
@@ -44,7 +50,14 @@ func (s *service) CreateCommand(ctx context.Context, req *pb.Command) (*pb.Respo
 	if err != nil {
 		return nil, err
 	}
+	log.Printf("Request to create response: %v", command)
 	return &pb.Response{Created: true, Command: command}, nil //Response -> check consigment.proto and consigment.pb.go
+}
+
+//GetAllCommands...
+func (s *service) GetAllCommands(ctx context.Context, req *pb.GetRequest) (*pb.Response, error) {
+	commands := s.repo.GetAll()
+	return &pb.Response{Commands: commands}, nil
 }
 
 func main() {
