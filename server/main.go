@@ -5,7 +5,7 @@ import (
 	"log"
 	"net"
 
-	pb "github.com/RaminCH/lec5/grpc_containers/server/proto/consigment"
+	pb "github.com/RaminCH/test/server/proto/consigment"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
@@ -22,12 +22,12 @@ type repository interface {
 
 //Repository... Nasha DB - localnaya - v dalneyshem realniye DB na Docker budut
 type Repository struct {
-	commands *[]pb.Command
+	commands []*pb.Command
 }
 
 //Create...		(etot metod budet delat Create dla 'type service struct' )
 func (r *Repository) Create(command *pb.Command) (*pb.Command, error) {
-	updatedCommands := append(*r.commands, command)
+	updatedCommands := append(r.commands, command)
 	r.commands = updatedCommands //yesli prisvoit srazu bez 'updatedCommands' to budet infinite loop !
 	return command, nil
 }

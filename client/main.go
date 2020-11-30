@@ -4,15 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"io/ioutil"
-	pb "github.com/RaminCH/lec5/client/proto/consigment"
-	"google.golang.org/genproto/googleapis/cloud/bigquery/connection/v1"
+	"log"
+
+	pb "github.com/RaminCH/test/client/proto/consigment"
 	"google.golang.org/grpc"
 )
 
-
-
 const (
-	address = "localhost:50051"
+	address         = "localhost:50051"
 	defaultFilename = "command.json"
 )
 
@@ -40,7 +39,7 @@ func main() {
 		log.Fatalf("connot parse .json file: %v", err)
 	}
 
-	resp, err := client.CreateCommand(context.Background(), command) 
+	resp, err := client.CreateCommand(context.Background(), command)
 	if err != nil {
 		log.Fatalf("connot get response: %v", err)
 	}
@@ -53,7 +52,7 @@ func main() {
 		log.Fatalf("connot get response: %v", err)
 	}
 
-	for _, v := range.getAll.Commands {
+	for _, v := range getAll.Commands {
 		log.Println(v)
 	}
 }
