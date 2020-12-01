@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 
-	pb "github.com/RaminCH/test/client/proto/consigment"
+	pb "github.com/RaminCH_self/Go3_gRPC/lec5/client/proto/consigment"
 	"google.golang.org/grpc"
 )
 
