@@ -1,4 +1,4 @@
-module github.com/RaminCH/test/server
+module github.com/RaminCH_self/Go3_gRPC/lec5/server
 
 go 1.15
 

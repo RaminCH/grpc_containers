@@ -5,7 +5,7 @@ import (
 	"log"
 	"net"
 
-	pb "github.com/RaminCH/test/server/proto/consigment"
+	pb "github.com/RaminCH_self/Go3_gRPC/lec5/server/proto/consigment"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
@@ -50,7 +50,6 @@ func (s *service) CreateCommand(ctx context.Context, req *pb.Command) (*pb.Respo
 	if err != nil {
 		return nil, err
 	}
-	log.Printf("Request to create response: %v", command)
 	return &pb.Response{Created: true, Command: command}, nil //Response -> check consigment.proto and consigment.pb.go
 }
 
